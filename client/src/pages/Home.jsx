@@ -1,21 +1,59 @@
-import {Link} from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
-    <div className='card'>
-      <h2>Home</h2>
-      <p className="small">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aliquid eius et provident possimus itaque nisi vitae eligendi tenetur distinctio eos. Sunt eligendi eaque earum maxime!</p>
-      <div className="row">
-        <Link to='/courses' className="link active">Browse Courses</Link>
-        <Link to='/dashboard' className="link active">Go To Dashboard</Link>
-      </div>
+    <div className="home">
+      {/* HERO */}
+      <section className="hero">
+        <h1>Track. Analyze. Win.</h1>
+        <p>
+          Your all-in-one hub for live scores, performance stats, and
+          competitive insights.
+        </p>
 
-      <hr />
-      <p className="small">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur alias accusamus sequi, ratione sapiente itaque recusandae minus distinctio voluptatibus provident modi quia, neque harum facilis.
-      </p>
+        <div className="hero-actions">
+          <Link to="/scores" className="btn primary">
+            View Live Scores
+          </Link>
+          <Link to="/dashboard" className="btn secondary">
+            Dashboard
+          </Link>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section className="stats">
+        <div className="stat-card">
+          <h2>120+</h2>
+          <span>Teams Tracked</span>
+        </div>
+        <div className="stat-card">
+          <h2>5K+</h2>
+          <span>Games Logged</span>
+        </div>
+        <div className="stat-card">
+          <h2>99.9%</h2>
+          <span>Uptime</span>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="features">
+        <div className="feature">
+          <h3>📊 Advanced Stats</h3>
+          <p>Break down performance with clean, readable analytics.</p>
+        </div>
+        <div className="feature">
+          <h3>⚡ Real-Time Updates</h3>
+          <p>Instant score updates so you never miss a moment.</p>
+        </div>
+        <div className="feature">
+          <h3>🏆 Competitive Insights</h3>
+          <p>Compare teams, players, and trends with ease.</p>
+        </div>
+      </section>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
