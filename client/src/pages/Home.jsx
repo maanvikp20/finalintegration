@@ -24,15 +24,15 @@ const Home = () => {
       {/* STATS */}
       <section className="stats">
         <div className="stat-card">
-          <h2>120+</h2>
+          <h2>1+</h2>
           <span>Teams Tracked</span>
         </div>
         <div className="stat-card">
-          <h2>5K+</h2>
+          <h2>1+</h2>
           <span>Games Logged</span>
         </div>
         <div className="stat-card">
-          <h2>99.9%</h2>
+          <h2>67.67%</h2>
           <span>Uptime</span>
         </div>
       </section>
