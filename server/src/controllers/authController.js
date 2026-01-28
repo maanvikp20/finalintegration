@@ -1,10 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 /**
  * Auth Controller
- * --> Register/Login
+ * --> Signup/Login
  * --> Issues JWT Tokens
  */
 
@@ -17,31 +17,7 @@ function signToken(user) {
   )
 }
 
-// POST /api/auth/register
-// async function register(req, res, next) {
-//   try {
-//     const {name, email, password} = req.body;
-//     const existingUser = await User.findOne({email});
-//     if (existingUser) {
-//       return res.status(409).json({message: "Email already in use"});
-//     }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     const newUser = new User({name, email, password: hashedPassword});
-//     await newUser.save();
-
-//     const token = signToken(newUser);
-//     res.status(201).json({
-//       token,
-//       user: {id: newUser._id, name: newUser.name, email: newUser.email}
-//     });
-
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-async function register(req, res, next) {
+async function signup(req, res, next) {
   try {
     const {name, email, password} = req.body;
 
@@ -105,4 +81,4 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = {register, login};
+module.exports = {signup, login};

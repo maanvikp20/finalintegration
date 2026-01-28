@@ -1,10 +1,21 @@
+/* ==========================================
+   RESET & BASE STYLES
+   ========================================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Navbar.jsx styles */
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================
+   NAVBAR
+   ========================================== */
 .nav {
   background-color: #1e293b;
   padding: 1rem 2rem;
@@ -27,6 +38,7 @@
   margin-left: 1.5rem;
   text-decoration: none;
   font-weight: 500;
+  transition: all 0.2s;
 }
 
 .navbar-links .link:hover {
@@ -34,7 +46,10 @@
   transform: scale(1.05);
 }
 
-/* Home.jsx styles */
+
+/* ==========================================
+   HOME
+   ========================================== */
 .home {
   color: #fff;
   background: linear-gradient(180deg, #0f172a, #020617);
@@ -136,20 +151,9 @@
   color: #94a3b8;
 }
 
-/* Reset and Base Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: "Inter", system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Scores Page Container */
+/* ==========================================
+   SCORES PAGE
+   ========================================== */
 .scores {
   color: #fff;
   background: linear-gradient(180deg, #0f172a, #020617);
@@ -170,7 +174,7 @@ body {
 
 .scores-header {
   max-width: 1200px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,6 +185,38 @@ body {
 .last-updated {
   font-size: 0.875rem;
   color: #94a3b8;
+}
+
+/* League Selector */
+.league-selector {
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.league-btn {
+  padding: 0.75rem 2rem;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 999px;
+  color: #cbd5f5;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.league-btn:hover {
+  border-color: #334155;
+  transform: scale(1.05);
+}
+
+.league-btn.active {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
 }
 
 /* Loading State */
@@ -269,18 +305,6 @@ body {
   gap: 2rem;
 }
 
-@media (min-width: 768px) {
-  .score-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .score-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 .games-count {
   margin-bottom: 1.5rem;
   color: #94a3b8;
@@ -315,7 +339,9 @@ body {
   color: #94a3b8;
 }
 
-/* Score Card */
+/* ==========================================
+   SCORE CARD
+   ========================================== */
 .score-card {
   background: #020617;
   border: 1px solid #1e293b;
@@ -388,7 +414,6 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Team Row */
 .team-row {
   display: flex;
   align-items: center;
@@ -421,6 +446,23 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .team-record {
@@ -490,8 +532,255 @@ body {
   color: #64748b;
 }
 
-/* Responsive adjustments */
+/* ==========================================
+   LOGIN & SIGNUP PAGES
+   ========================================== */
+.login,
+.signup {
+  color: #fff;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  min-height: 100vh;
+  padding: 4rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-container,
+.signup-container {
+  max-width: 440px;
+  width: 100%;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 2.5rem;
+}
+
+.login-header,
+.signup-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.login-header h2,
+.signup-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.login-header p,
+.signup-header p {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+/* Forms */
+.login-form,
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.login-form label,
+.signup-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #cbd5f5;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"],
+.login-form input[type="text"],
+.signup-form input[type="email"],
+.signup-form input[type="password"],
+.signup-form input[type="text"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.login-form input[type="email"]:focus,
+.login-form input[type="password"]:focus,
+.login-form input[type="text"]:focus,
+.signup-form input[type="email"]:focus,
+.signup-form input[type="password"]:focus,
+.signup-form input[type="text"]:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.login-form input[type="email"]:disabled,
+.login-form input[type="password"]:disabled,
+.login-form input[type="text"]:disabled,
+.signup-form input[type="email"]:disabled,
+.signup-form input[type="password"]:disabled,
+.signup-form input[type="text"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.login-form input::placeholder,
+.signup-form input::placeholder {
+  color: #64748b;
+}
+
+/* Form Rows */
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-half {
+  flex: 1;
+}
+
+/* Checkboxes */
+.remember,
+.agree {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+  font-weight: 500 !important;
+}
+
+.login-form input[type="checkbox"],
+.signup-form input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+  accent-color: #ef4444;
+}
+
+/* Password Toggle */
+.password-toggle {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toggle-btn {
+  padding: 0.5rem 1rem;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  color: #cbd5f5;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  border-color: #334155;
+  background: #1e293b;
+}
+
+.password-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* Submit Buttons */
+.login-form button[type="submit"],
+.signup-form button[type="submit"] {
+  width: 100%;
+  padding: 0.75rem 1.6rem;
+  background: #ef4444;
+  border: none;
+  border-radius: 999px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 0.5rem;
+}
+
+.login-form button[type="submit"]:hover,
+.signup-form button[type="submit"]:hover {
+  background: #dc2626;
+  transform: scale(1.02);
+}
+
+.login-form button[type="submit"]:disabled,
+.signup-form button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error & Success Messages */
+.login-form .error,
+.signup-form .error,
+.field-error {
+  color: #f87171;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.login-form .success,
+.signup-form .success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  color: #34d399;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Auth Links */
+.auth-links {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.auth-links a {
+  color: #ef4444;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.auth-links a:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+@media (min-width: 768px) {
+  .score-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .score-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
+  /* Scores Page */
   .scores {
     padding: 2rem 1rem;
   }
@@ -513,9 +802,41 @@ body {
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  /* League Selector */
+  .league-selector {
+    flex-direction: column;
+  }
+  
+  .league-btn {
+    width: 100%;
+  }
+
+  /* Auth Pages */
+  .login,
+  .signup {
+    padding: 2rem 1rem;
+  }
+
+  .login-container,
+  .signup-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-header h2,
+  .signup-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
 }
 
-/* Utility Classes */
+/* ==========================================
+   UTILITY CLASSES
+   ========================================== */
 .text-center {
   text-align: center;
 }

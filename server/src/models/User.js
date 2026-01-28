@@ -1,16 +1,30 @@
 const mongoose = require('mongoose');
-/**
- * User Model for Authentication
- * Password is stored in hashed format NEVER PLAIN TEXT
- */
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {type:String, required:true, trim:true, maxLength:80},
-    email: {type:String, required:true, trim:true, unique:true, lowercase:true},
-    passwordHash: {type: String, required:true},
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true
   },
-  {timestamps: true}
-)
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
+  },
+  passwordHash: {
+    type: String,
+    required: [true, 'Password is required']
+  }
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.models.User || mongoose.model("User", userSchema);
+// Index for faster email lookups
+userSchema.index({ email: 1 });
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;

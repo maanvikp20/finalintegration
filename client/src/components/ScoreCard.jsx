@@ -31,29 +31,44 @@ const ScoreCard = ({ game }) => {
   else if (isCompleted) statusClass += 'status-final';
   else statusClass += 'status-scheduled';
 
-  // Determine status text
   let statusText = '';
   if (isLive) statusText = `LIVE - ${status.displayClock}`;
   else if (isCompleted) statusText = 'FINAL';
   else statusText = status.type.shortDetail;
 
+  const getRank = (team) => {
+    return team?.curatedRank?.current;
+  };
+
+  const renderTeamName = (team) => {
+    const rank = getRank(team);
+    const displayName = team?.team?.displayName || 'Team';
+    
+    if (rank && rank <= 25) {
+      return (
+        <>
+          <span className="rank-badge">{rank}</span>
+          {displayName}
+        </>
+      );
+    }
+    return displayName;
+  };
+
   return (
     <div className="score-card">
-      {/* Status Badge */}
       <div className="status-header">
         <span className={statusClass}>
           {statusText}
         </span>
         {isLive && (
           <span className="period-info">
-            Period {status.period}
+            {status.period > 2 ? `OT ${status.period - 2}` : `Period ${status.period}`}
           </span>
         )}
       </div>
 
-      {/* Teams and Scores */}
       <div className="teams-container">
-        {/* Away Team */}
         <div className="team-row">
           <div className="team-info">
             {awayTeam?.team?.logo && (
@@ -65,7 +80,7 @@ const ScoreCard = ({ game }) => {
             )}
             <div className="team-details">
               <p className="team-name">
-                {awayTeam?.team?.displayName || 'Away Team'}
+                {renderTeamName(awayTeam)}
               </p>
               <p className="team-record">
                 {awayTeam?.records?.[0]?.summary || ''}
@@ -77,7 +92,6 @@ const ScoreCard = ({ game }) => {
           </span>
         </div>
 
-        {/* Home Team */}
         <div className="team-row">
           <div className="team-info">
             {homeTeam?.team?.logo && (
@@ -89,7 +103,7 @@ const ScoreCard = ({ game }) => {
             )}
             <div className="team-details">
               <p className="team-name">
-                {homeTeam?.team?.displayName || 'Home Team'}
+                {renderTeamName(homeTeam)}
               </p>
               <p className="team-record">
                 {homeTeam?.records?.[0]?.summary || ''}
@@ -102,7 +116,6 @@ const ScoreCard = ({ game }) => {
         </div>
       </div>
 
-      {/* Betting Info (for scheduled games) */}
       {isScheduled && (spread || overUnder) && (
         <div className="betting-info">
           {spread && (
@@ -120,7 +133,6 @@ const ScoreCard = ({ game }) => {
         </div>
       )}
 
-      {/* Venue Info */}
       {competition.venue && (
         <div className="venue-info">
           <p className="venue-text">

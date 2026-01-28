@@ -2,21 +2,30 @@ import { useEffect, useState } from "react";
 import ScoreCard from "../components/ScoreCard";
 
 const Scores = () => {
-  const [games, setGames] = useState([]);
+  const [nbaGames, setNbaGames] = useState([]);
+  const [collegeGames, setCollegeGames] = useState([]);
+  const [wnbaGames, setWnbaGames] = useState([]);
+  const [womensCollegeGames, setWomensCollegeGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [activeLeague, setActiveLeague] = useState("nba"); // "nba", "college", "wnba", "womens-college"
 
-  async function fetchBasketballScores() {
+  async function fetchBasketballScores(league) {
     try {
-      const res = await fetch(
-        "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
-      );
+      const endpoints = {
+        nba: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
+        college: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
+        wnba: "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard",
+        "womens-college": "https://site.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/scoreboard"
+      };
+      
+      const res = await fetch(endpoints[league]);
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const data = await res.json();
       return data.events || [];
     } catch (err) {
-      console.error("Error fetching basketball scores:", err);
+      console.error(`Error fetching ${league} scores:`, err);
       throw err;
     }
   }
@@ -25,8 +34,16 @@ const Scores = () => {
     setLoading(true);
     setError("");
     try {
-      const events = await fetchBasketballScores();
-      setGames(events);
+      const [nbaEvents, collegeEvents, wnbaEvents, womensCollegeEvents] = await Promise.all([
+        fetchBasketballScores("nba"),
+        fetchBasketballScores("college"),
+        fetchBasketballScores("wnba"),
+        fetchBasketballScores("womens-college")
+      ]);
+      setNbaGames(nbaEvents);
+      setCollegeGames(collegeEvents);
+      setWnbaGames(wnbaEvents);
+      setWomensCollegeGames(womensCollegeEvents);
       setLastUpdated(new Date());
     } catch (err) {
       setError("Failed to load scores. Please try again later.");
@@ -57,16 +74,57 @@ const Scores = () => {
     };
   }, []);
 
+  // Get current games based on active league
+  const leagueConfig = {
+    nba: { games: nbaGames, title: "NBA", emoji: "🏀" },
+    college: { games: collegeGames, title: "Men's College Basketball", emoji: "🎓" },
+    wnba: { games: wnbaGames, title: "WNBA", emoji: "🏀" },
+    "womens-college": { games: womensCollegeGames, title: "Women's College Basketball", emoji: "🎓" }
+  };
+
+  const currentConfig = leagueConfig[activeLeague];
+  const currentGames = currentConfig.games;
+  const leagueTitle = currentConfig.title;
+  const leagueEmoji = currentConfig.emoji;
+
   return (
     <div className="scores">
       {/* Header */}
       <div className="scores-header">
-        <h1>🏀 Live NBA Games</h1>
+        <h1>{leagueEmoji} Live {leagueTitle} Games</h1>
         {lastUpdated && !loading && (
           <div className="last-updated">
             Last updated: {lastUpdated.toLocaleTimeString()}
           </div>
         )}
+      </div>
+
+      {/* League Selector */}
+      <div className="league-selector">
+        <button 
+          className={`league-btn ${activeLeague === "nba" ? "active" : ""}`}
+          onClick={() => setActiveLeague("nba")}
+        >
+          NBA ({nbaGames.length})
+        </button>
+        <button 
+          className={`league-btn ${activeLeague === "college" ? "active" : ""}`}
+          onClick={() => setActiveLeague("college")}
+        >
+          Men's College ({collegeGames.length})
+        </button>
+        <button 
+          className={`league-btn ${activeLeague === "wnba" ? "active" : ""}`}
+          onClick={() => setActiveLeague("wnba")}
+        >
+          WNBA ({wnbaGames.length})
+        </button>
+        <button 
+          className={`league-btn ${activeLeague === "womens-college" ? "active" : ""}`}
+          onClick={() => setActiveLeague("womens-college")}
+        >
+          Women's College ({womensCollegeGames.length})
+        </button>
       </div>
 
       {/* Loading State */}
@@ -107,7 +165,7 @@ const Scores = () => {
       {/* Games Grid */}
       {!loading && !error && (
         <>
-          {games.length === 0 ? (
+          {currentGames.length === 0 ? (
             <div className="empty-state">
               <svg 
                 className="empty-icon" 
@@ -128,10 +186,10 @@ const Scores = () => {
           ) : (
             <>
               <div className="games-count">
-                Showing {games.length} {games.length === 1 ? 'game' : 'games'}
+                Showing {currentGames.length} {currentGames.length === 1 ? 'game' : 'games'}
               </div>
               <div className="score-cards">
-                {games.map((game, index) => (
+                {currentGames.map((game, index) => (
                   <ScoreCard 
                     key={game.id || `game-${index}`} 
                     game={game} 
@@ -144,7 +202,7 @@ const Scores = () => {
       )}
 
       {/* Auto-refresh indicator */}
-      {!loading && !error && games.length > 0 && (
+      {!loading && !error && currentGames.length > 0 && (
         <div className="auto-refresh">
           <p>⟳ Auto-refreshing every 30 seconds</p>
         </div>
