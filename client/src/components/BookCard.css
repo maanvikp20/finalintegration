@@ -1,0 +1,97 @@
+.book-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: white;
+}
+
+.book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.book-header {
+  margin-bottom: 10px;
+}
+
+.book-header h3 {
+  color: #333;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.star {
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+.star.empty {
+  color: #ddd;
+}
+
+.rating-number {
+  font-weight: bold;
+  color: #666;
+  margin-left: 4px;
+}
+
+.author {
+  color: #666;
+  font-style: italic;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.review {
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.book-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit {
+  background: #28a745;
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: #218838;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #c82333;
+}

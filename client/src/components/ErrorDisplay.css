@@ -1,0 +1,21 @@
+.error-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: white;
+}
+
+.error-container h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.error-container p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.error-hint {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  font-style: italic;
+}

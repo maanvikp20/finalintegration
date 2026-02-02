@@ -1,53 +1,54 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
-
-const connectDB = require("./src/config/db");
-const authRoutes = require("./src/routes/authRoutes");
-const scoreRoutes = require("./src/routes/scoreRoutes");
-const errorHandler = require("./src/middleware/errorHandler")
+const authRoutes = require('./routes/authRoutes');
+const bookRoutes = require('./routes/bookRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Connect to MongoDB
-connectDB(process.env.MONGODB_URI);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API Routes
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
+// Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/scores', scoreRoutes);
+app.use('/api/books', bookRoutes);
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-}
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+// Health check route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Book Review API with Authentication is running!',
+    endpoints: {
+      auth: '/api/auth',
+      books: '/api/books'
+    }
   });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({ error: 'Route not found' });
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server is running on http://localhost:${PORT}`);
+  console.log(`🔐 Auth API available at http://localhost:${PORT}/api/auth`);
+  console.log(`📚 Books API available at http://localhost:${PORT}/api/books`);
+  console.log(`\n📝 Demo Account: demo@example.com / password123`);
 });
 
 module.exports = app;
