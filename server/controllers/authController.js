@@ -1,115 +1,161 @@
 const User = require('../models/User');
 
 // Register new user
-const register = (req, res) => {
+const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Validate input
-    const errors = User.validate({ username, email, password }, false);
-    if (errors.length > 0) {
-      return res.status(400).json({ error: errors.join(', ') });
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+      if (existingUser.username === username) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
     }
 
-    // Create user
-    const result = User.create({ username, email, password });
+    // Create new user
+    const user = new User({ username, email, password });
+    await user.save();
 
-    if (result.error) {
-      return res.status(400).json({ error: result.error });
-    }
+    const userResponse = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt
+    };
 
-    setTimeout(() => {
-      res.status(201).json({
-        message: 'User registered successfully',
-        user: result
-      });
-    }, 300);
+    res.status(201).json({
+      message: 'User registered successfully',
+      user: userResponse
+    });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ error: messages.join(', ') });
+    }
+    console.error('Registration error:', error);
     res.status(500).json({ error: 'Failed to register user' });
   }
 };
 
 // Login user
-const login = (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
-    const errors = User.validate({ email, password }, true);
-    if (errors.length > 0) {
-      return res.status(400).json({ error: errors.join(', ') });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Attempt login
-    const user = User.login(email, password);
-
-    if (!user) {
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    setTimeout(() => {
-      res.status(200).json({
-        message: 'Login successful',
-        user: user
-      });
-    }, 300);
+    const userResponse = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt
+    };
+
+    res.status(200).json({
+      message: 'Login successful',
+      user: userResponse
+    });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Failed to login' });
   }
 };
 
-// Get current user profile
-const getProfile = (req, res) => {
+// Get user profile
+const getProfile = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = User.getById(userId);
-
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.status(200).json(user);
+    res.status(200).json({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt
+    });
   } catch (error) {
+    console.error('Get profile error:', error);
     res.status(500).json({ error: 'Failed to get profile' });
   }
 };
 
 // Update user profile
-const updateProfile = (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const { userId } = req.params;
     const { username, email, password } = req.body;
 
-    // Validate input
-    const errors = User.validate({ username, email, password }, false);
-    if (errors.length > 0) {
-      return res.status(400).json({ error: errors.join(', ') });
+    // Check if new email/username is already taken by another user
+    if (email || username) {
+      const existingUser = await User.findOne({
+        $or: [
+          ...(email ? [{ email }] : []),
+          ...(username ? [{ username }] : [])
+        ],
+        _id: { $ne: userId }
+      });
+
+      if (existingUser) {
+        if (existingUser.email === email) {
+          return res.status(400).json({ error: 'Email already exists' });
+        }
+        if (existingUser.username === username) {
+          return res.status(400).json({ error: 'Username already exists' });
+        }
+      }
     }
 
-    // Update user
-    const result = User.update(userId, { username, email, password });
+    const updateData = {};
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+    if (password) updateData.password = password;
 
-    if (!result) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (result.error) {
-      return res.status(400).json({ error: result.error });
-    }
-
-    setTimeout(() => {
-      res.status(200).json({
-        message: 'Profile updated successfully',
-        user: result
-      });
-    }, 300);
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt
+      }
+    });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ error: messages.join(', ') });
+    }
+    console.error('Update profile error:', error);
     res.status(500).json({ error: 'Failed to update profile' });
   }
 };
 
-// Logout (client-side only in this implementation)
+// Logout
 const logout = (req, res) => {
   res.status(200).json({ message: 'Logout successful' });
 };

@@ -1,39 +1,94 @@
-import React, { useState } from 'react';
-import { useAuth } from './context/AuthContext';
-import { useBooks } from './hooks/useBooks';
+import React, { useState, useEffect } from 'react';
+import { FiPlus, FiLogOut, FiUser } from 'react-icons/fi';
 import Login from './components/Login';
 import Register from './components/Register';
 import BookList from './components/BookList';
 import BookForm from './components/BookForm';
-import UserProfile from './components/UserProfile';
 import UserStats from './components/UserStats';
 import Loading from './components/Loading';
 import ErrorDisplay from './components/ErrorDisplay';
 import './App.css';
 
+const API_URL = 'http://localhost:5000/api/books';
+
 function App() {
-  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
-  const { books, stats, isLoading, error, fetchBooks, addBook, updateBook, removeBook } = useBooks();
+  const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(true);
+  const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+  const [refreshStats, setRefreshStats] = useState(0);
 
-  const handleAddBook = async (bookData) => {
-    const result = await addBook(bookData);
-    if (result.success) {
-      setShowForm(false);
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('user');
+      }
     }
-    return result;
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchBooks();
+    } else {
+      setBooks([]);
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const fetchBooks = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_URL}?userId=${user.id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch books');
+      }
+
+      const data = await response.json();
+      setBooks(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUpdateBook = async (bookData) => {
-    const result = await updateBook(editingBook.id, bookData);
-    if (result.success) {
-      setEditingBook(null);
-      setShowForm(false);
-    }
-    return result;
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    setShowForm(false);
+    setEditingBook(null);
+    setBooks([]);
+  };
+
+  const handleBookAdded = (newBook) => {
+    setBooks([newBook, ...books]);
+    setShowForm(false);
+    setRefreshStats(prev => prev + 1);
+  };
+
+  const handleBookUpdated = (updatedBook) => {
+    setBooks(books.map(book => 
+      book._id === updatedBook._id ? updatedBook : book
+    ));
+    setEditingBook(null);
+    setShowForm(false);
+    setRefreshStats(prev => prev + 1);
   };
 
   const handleEdit = (book) => {
@@ -46,18 +101,12 @@ function App() {
     setShowForm(false);
   };
 
-  const handleDelete = async (id) => {
-    await removeBook(id);
+  const handleDelete = (bookId) => {
+    setBooks(books.filter(book => book._id !== bookId));
+    setRefreshStats(prev => prev + 1);
   };
 
-  const handleLogout = () => {
-    logout();
-    setShowForm(false);
-    setEditingBook(null);
-  };
-
-  // Show loading while checking authentication
-  if (authLoading) {
+  if (isLoading && !user) {
     return (
       <div className="app">
         <Loading />
@@ -65,112 +114,139 @@ function App() {
     );
   }
 
-  // Show login/register if not authenticated
-  if (!isAuthenticated) {
+  if (!user) {
     return (
-      <div className="app">
+      <div className="app auth-page">
         {showLogin ? (
-          <Login onSwitchToRegister={() => setShowLogin(false)} />
+          <Login 
+            onLogin={handleLogin} 
+            onSwitchToRegister={() => setShowLogin(false)} 
+          />
         ) : (
-          <Register onSwitchToLogin={() => setShowLogin(true)} />
+          <Register 
+            onLogin={handleLogin} 
+            onSwitchToLogin={() => setShowLogin(true)} 
+          />
         )}
       </div>
     );
   }
 
-  // Show loading while fetching books
   if (isLoading) {
     return (
       <div className="app">
         <header className="app-header">
-          <h1>📚 Book Review Dashboard</h1>
-          <div className="header-actions">
-            <span className="user-greeting">Welcome, {user.username}!</span>
-            <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
-              Logout
-            </button>
+          <div className="container">
+            <div className="header-content">
+              <h1 className="app-title">Book Review</h1>
+              <div className="header-actions">
+                <div className="user-info">
+                  <FiUser className="user-icon" />
+                  <span>{user.username}</span>
+                </div>
+                <button className="btn-icon" onClick={handleLogout} title="Logout">
+                  <FiLogOut />
+                </button>
+              </div>
+            </div>
           </div>
         </header>
-        <main className="app-main">
-          <Loading />
+        <main className="main-content">
+          <div className="container">
+            <Loading />
+          </div>
         </main>
       </div>
     );
   }
 
-  // Show error if there's an error
   if (error) {
     return (
       <div className="app">
         <header className="app-header">
-          <h1>📚 Book Review Dashboard</h1>
-          <div className="header-actions">
-            <span className="user-greeting">Welcome, {user.username}!</span>
-            <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
-              Logout
-            </button>
+          <div className="container">
+            <div className="header-content">
+              <h1 className="app-title">Book Review</h1>
+              <div className="header-actions">
+                <div className="user-info">
+                  <FiUser className="user-icon" />
+                  <span>{user.username}</span>
+                </div>
+                <button className="btn-icon" onClick={handleLogout} title="Logout">
+                  <FiLogOut />
+                </button>
+              </div>
+            </div>
           </div>
         </header>
-        <main className="app-main">
-          <ErrorDisplay error={error} onRetry={fetchBooks} />
+        <main className="main-content">
+          <div className="container">
+            <ErrorDisplay error={error} onRetry={fetchBooks} />
+          </div>
         </main>
       </div>
     );
   }
 
-  // Main application view
   return (
     <div className="app">
       <header className="app-header">
-        <h1>📚 Book Review Dashboard</h1>
-        <div className="header-actions">
-          <span className="user-greeting">Welcome, {user.username}!</span>
-          <button 
-            className="btn btn-secondary btn-sm" 
-            onClick={() => setShowProfile(true)}
-          >
-            My Profile
-          </button>
-          <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
-            Logout
-          </button>
+        <div className="container">
+          <div className="header-content">
+            <h1 className="app-title">Book Review</h1>
+            <div className="header-actions">
+              <div className="user-info">
+                <FiUser className="user-icon" />
+                <span>{user.username}</span>
+              </div>
+              <button className="btn-icon" onClick={handleLogout} title="Logout">
+                <FiLogOut />
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="app-main">
-        <UserStats stats={stats} />
+      <main className="main-content">
+        <div className="container">
+          <UserStats userId={user.id} key={refreshStats} />
 
-        {!showForm && (
-          <button 
-            className="btn btn-primary btn-add-new" 
-            onClick={() => setShowForm(true)}
-          >
-            + Add New Review
-          </button>
-        )}
+          {!showForm && (
+            <div className="section-header">
+              <h2>My Reviews</h2>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setShowForm(true)}
+              >
+                <FiPlus />
+                Add Review
+              </button>
+            </div>
+          )}
 
-        {showForm ? (
-          <BookForm
-            onSubmit={editingBook ? handleUpdateBook : handleAddBook}
-            onCancel={handleCancel}
-            editingBook={editingBook}
-          />
-        ) : (
-          <BookList
-            books={books}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-          />
-        )}
+          {showForm ? (
+            <BookForm
+              userId={user.id}
+              onSuccess={editingBook ? handleBookUpdated : handleBookAdded}
+              onCancel={handleCancel}
+              editingBook={editingBook}
+            />
+          ) : (
+            <BookList
+              books={books}
+              userId={user.id}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+            />
+          )}
+        </div>
       </main>
 
       <footer className="app-footer">
-        <p>Total Reviews: {books.length} | Average Rating: {stats?.averageRating?.toFixed(1) || '0'} ⭐</p>
+        <div className="container">
+          <p>{books.length} {books.length === 1 ? 'Review' : 'Reviews'} • MongoDB</p>
+        </div>
       </footer>
-
-      {showProfile && (
-        <UserProfile onClose={() => setShowProfile(false)} />
-      )}
     </div>
   );
 }

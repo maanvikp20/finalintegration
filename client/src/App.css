@@ -1,35 +1,184 @@
-/* Header adjustments */
-.app-header h1 {
-  font-weight: 700;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.user-greeting {
-  font-weight: 400;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #fafafa;
+  color: #1a1a1a;
 }
 
-/* Buttons detailed */
-.btn-sm {
-  padding: 6px 14px;
-  font-size: 0.85rem;
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.btn-add-new {
-  font-weight: 500;
-  border-radius: 10px;
+.app.auth-page {
+  background: #fafafa;
 }
 
-/* App main content tweaks */
-.app-main {
-  transition: all 0.3s ease;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
 }
 
-/* Optional: subtle card hover effect */
-.app-main:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+/* Header */
+.app-header {
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px 0;
 }
 
-/* Footer subtle styling */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.user-icon {
+  font-size: 16px;
+  color: #666;
+}
+
+.btn-icon {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+  font-size: 18px;
+}
+
+.btn-icon:hover {
+  background: #f8f8f8;
+  border-color: #d0d0d0;
+  color: #1a1a1a;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 32px 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.3px;
+}
+
+/* Footer */
 .app-footer {
-  opacity: 0.8;
+  background: white;
+  border-top: 1px solid #e5e5e5;
+  padding: 16px 0;
+  margin-top: auto;
+}
+
+.app-footer p {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #1a1a1a;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-wrap: wrap;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .section-header .btn {
+    width: 100%;
+  }
+
+  .user-info span {
+    display: none;
+  }
 }

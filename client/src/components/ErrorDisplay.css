@@ -1,21 +1,39 @@
 .error-container {
+  padding: 80px 20px;
+}
+
+.error-content {
+  max-width: 400px;
+  margin: 0 auto;
   text-align: center;
-  padding: 60px 20px;
-  color: white;
 }
 
-.error-container h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+.error-icon {
+  font-size: 48px;
+  color: #c33;
+  margin-bottom: 16px;
 }
 
-.error-container p {
-  font-size: 1.1rem;
-  margin-bottom: 20px;
+.error-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.error-content p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
 }
 
 .error-hint {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  font-style: italic;
+  font-size: 13px;
+  color: #888;
+  margin-top: 16px !important;
+}
+
+.error-content .btn {
+  margin: 0 auto;
 }

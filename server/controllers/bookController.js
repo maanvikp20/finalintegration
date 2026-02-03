@@ -1,41 +1,41 @@
 const Book = require('../models/Book');
 
-// Get all books for the logged-in user
-const getAllBooks = (req, res) => {
+// Get all books for a user
+const getAllBooks = async (req, res) => {
   try {
-    const userId = req.query.userId;
+    const { userId } = req.query;
 
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    setTimeout(() => {
-      const books = Book.getAll(userId);
-      res.status(200).json(books);
-    }, 500);
+    const books = await Book.find({ userId }).sort({ createdAt: -1 });
+    res.status(200).json(books);
   } catch (error) {
+    console.error('Get books error:', error);
     res.status(500).json({ error: 'Failed to fetch books' });
   }
 };
 
-// Get single book by ID
-const getBookById = (req, res) => {
+// Get single book
+const getBookById = async (req, res) => {
   try {
     const { id } = req.params;
-    const book = Book.getById(id);
 
+    const book = await Book.findById(id);
     if (!book) {
       return res.status(404).json({ error: 'Book not found' });
     }
 
     res.status(200).json(book);
   } catch (error) {
+    console.error('Get book error:', error);
     res.status(500).json({ error: 'Failed to fetch book' });
   }
 };
 
 // Create new book
-const createBook = (req, res) => {
+const createBook = async (req, res) => {
   try {
     const { userId, title, author, rating, review } = req.body;
 
@@ -43,25 +43,28 @@ const createBook = (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    // Validate input
-    const errors = Book.validate({ title, author, rating, review });
-    if (errors.length > 0) {
-      return res.status(400).json({ error: errors.join(', ') });
-    }
+    const book = new Book({
+      userId,
+      title,
+      author,
+      rating,
+      review
+    });
 
-    // Create book
-    const newBook = Book.create({ userId, title, author, rating, review });
-
-    setTimeout(() => {
-      res.status(201).json(newBook);
-    }, 300);
+    await book.save();
+    res.status(201).json(book);
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ error: messages.join(', ') });
+    }
+    console.error('Create book error:', error);
     res.status(500).json({ error: 'Failed to create book' });
   }
 };
 
 // Update book
-const updateBook = (req, res) => {
+const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
     const { userId, title, author, rating, review } = req.body;
@@ -70,35 +73,36 @@ const updateBook = (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    // Check if book exists
-    const existingBook = Book.getById(id);
-    if (!existingBook) {
+    // Check if book exists and belongs to user
+    const book = await Book.findById(id);
+    if (!book) {
       return res.status(404).json({ error: 'Book not found' });
     }
 
-    // Validate input
-    const errors = Book.validate({ title, author, rating, review });
-    if (errors.length > 0) {
-      return res.status(400).json({ error: errors.join(', ') });
+    if (book.userId.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to update this book' });
     }
 
     // Update book
-    const result = Book.update(id, userId, { title, author, rating, review });
+    book.title = title;
+    book.author = author;
+    book.rating = rating;
+    book.review = review;
 
-    if (result.error) {
-      return res.status(403).json({ error: result.error });
-    }
-
-    setTimeout(() => {
-      res.status(200).json(result);
-    }, 300);
+    await book.save();
+    res.status(200).json(book);
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ error: messages.join(', ') });
+    }
+    console.error('Update book error:', error);
     res.status(500).json({ error: 'Failed to update book' });
   }
 };
 
 // Delete book
-const deleteBook = (req, res) => {
+const deleteBook = async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.query;
@@ -107,26 +111,26 @@ const deleteBook = (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    // Delete book
-    const result = Book.delete(id, userId);
-
-    if (result.error) {
-      if (result.error === 'Book not found') {
-        return res.status(404).json({ error: result.error });
-      }
-      return res.status(403).json({ error: result.error });
+    // Check if book exists and belongs to user
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
     }
 
-    setTimeout(() => {
-      res.status(204).send();
-    }, 300);
+    if (book.userId.toString() !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to delete this book' });
+    }
+
+    await Book.findByIdAndDelete(id);
+    res.status(204).send();
   } catch (error) {
+    console.error('Delete book error:', error);
     res.status(500).json({ error: 'Failed to delete book' });
   }
 };
 
 // Get user statistics
-const getUserStats = (req, res) => {
+const getUserStats = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -134,9 +138,37 @@ const getUserStats = (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    const stats = Book.getUserStats(userId);
-    res.status(200).json(stats);
+    const books = await Book.find({ userId });
+
+    if (books.length === 0) {
+      return res.status(200).json({
+        totalBooks: 0,
+        averageRating: 0,
+        highestRated: null,
+        recentReview: null
+      });
+    }
+
+    const totalRating = books.reduce((sum, book) => sum + book.rating, 0);
+    const averageRating = totalRating / books.length;
+
+    const highestRated = books.reduce((max, book) => 
+      book.rating > max.rating ? book : max
+    );
+
+    const sortedBooks = books.sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    const recentReview = sortedBooks[0];
+
+    res.status(200).json({
+      totalBooks: books.length,
+      averageRating: parseFloat(averageRating.toFixed(2)),
+      highestRated,
+      recentReview
+    });
   } catch (error) {
+    console.error('Get stats error:', error);
     res.status(500).json({ error: 'Failed to get statistics' });
   }
 };

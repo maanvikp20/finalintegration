@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import * as authService from '../services/authService';
-import { useAuth } from '../context/AuthContext';
+import { FiMail, FiLock, FiLogIn } from 'react-icons/fi';
 import './Auth.css';
 
-const Login = ({ onSwitchToRegister }) => {
-  const { login } = useAuth();
+const API_URL = 'http://localhost:5000/api/auth';
+
+const Login = ({ onLogin, onSwitchToRegister }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,79 +26,101 @@ const Login = ({ onSwitchToRegister }) => {
     setIsLoading(true);
     setError('');
 
-    const result = await authService.login(formData);
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    if (result.success) {
-      login(result.data.user);
-    } else {
-      setError(result.error);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+      onLogin(data.user);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>📚 Welcome Back!</h2>
-        <p className="auth-subtitle">Login to manage your book reviews</p>
+        <div className="auth-header">
+          <h1>Book Review</h1>
+          <p>Welcome back! Please login to continue.</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          {error && <div className="auth-error">{error}</div>}
+          {error && (
+            <div className="alert alert-error">
+              {error}
+            </div>
+          )}
 
-          <div className="demo-info">
-            <p><strong>Demo Account:</strong></p>
-            <p>Email: demo@example.com</p>
-            <p>Password: password123</p>
+          <div className="input-group">
+            <label htmlFor="email">Email Address</label>
+            <div className="input-wrapper">
+              <FiMail className="input-icon" />
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                disabled={isLoading}
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              disabled={isLoading}
-              required
-            />
-          </div>
-
-          <div className="form-group">
+          <div className="input-group">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              disabled={isLoading}
-              required
-            />
+            <div className="input-wrapper">
+              <FiLock className="input-icon" />
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                disabled={isLoading}
+                required
+              />
+            </div>
           </div>
 
           <button 
             type="submit" 
-            className="btn btn-primary btn-full"
+            className="btn btn-primary"
             disabled={isLoading}
           >
+            <FiLogIn />
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
-        <p className="auth-switch">
-          Don't have an account?{' '}
-          <button 
-            className="link-button" 
-            onClick={onSwitchToRegister}
-            disabled={isLoading}
-          >
-            Register here
-          </button>
-        </p>
+        <div className="auth-footer">
+          <p>
+            Don't have an account?{' '}
+            <button 
+              className="link-btn" 
+              onClick={onSwitchToRegister}
+              disabled={isLoading}
+            >
+              Create one
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

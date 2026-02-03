@@ -1,97 +1,120 @@
 .book-card {
-  border: 1px solid #e0e0e0;
+  background: white;
+  border: 1px solid #e5e5e5;
   border-radius: 8px;
   padding: 20px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: white;
+  transition: all 0.2s;
 }
 
 .book-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d0d0d0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
-.book-header {
-  margin-bottom: 10px;
-}
-
-.book-header h3 {
-  color: #333;
-  font-size: 1.3rem;
+.book-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
-.rating {
+.book-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.book-rating {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  background: #f8f8f8;
+  padding: 4px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.star {
-  color: #ffd700;
-  font-size: 1.2rem;
+.star-icon {
+  color: #333;
+  font-size: 14px;
 }
 
-.star.empty {
-  color: #ddd;
+.book-rating span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
 }
 
-.rating-number {
-  font-weight: bold;
+.book-author {
+  font-size: 14px;
   color: #666;
-  margin-left: 4px;
+  margin: 0 0 16px 0;
 }
 
-.author {
-  color: #666;
-  font-style: italic;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-}
-
-.review {
+.book-review {
+  font-size: 14px;
   color: #444;
   line-height: 1.6;
-  margin-bottom: 15px;
+  margin: 0 0 16px 0;
 }
 
-.book-footer {
+.book-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.date {
-  font-size: 0.85rem;
-  color: #999;
+.book-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #888;
 }
 
-.actions {
+.calendar-icon {
+  font-size: 14px;
+}
+
+.book-actions {
   display: flex;
   gap: 8px;
 }
 
-.btn-edit {
-  background: #28a745;
-  color: white;
-  padding: 8px 16px;
-  font-size: 0.85rem;
+.icon-btn {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
 }
 
-.btn-edit:hover:not(:disabled) {
-  background: #218838;
+.icon-btn:hover:not(:disabled) {
+  background: #f8f8f8;
+  border-color: #d0d0d0;
+  color: #1a1a1a;
 }
 
-.btn-delete {
-  background: #dc3545;
-  color: white;
-  padding: 8px 16px;
-  font-size: 0.85rem;
+.icon-btn-danger:hover:not(:disabled) {
+  background: #fee;
+  border-color: #fcc;
+  color: #c33;
 }
 
-.btn-delete:hover:not(:disabled) {
-  background: #c82333;
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

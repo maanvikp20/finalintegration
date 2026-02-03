@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { FiBook, FiUser, FiStar, FiFileText, FiSave, FiX } from 'react-icons/fi';
 import './BookForm.css';
 
-const BookForm = ({ onSubmit, onCancel, editingBook }) => {
+const API_URL = 'http://localhost:5000/api/books';
+
+const BookForm = ({ userId, onSuccess, onCancel, editingBook }) => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -42,7 +45,6 @@ const BookForm = ({ onSubmit, onCancel, editingBook }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Client-side validation
     if (!formData.title.trim() || !formData.author.trim() || !formData.review.trim()) {
       setFormError('Please fill in all fields');
       return;
@@ -57,90 +59,134 @@ const BookForm = ({ onSubmit, onCancel, editingBook }) => {
     setIsSaving(true);
     setFormError('');
 
-    const result = await onSubmit({
-      ...formData,
-      rating: rating,
-    });
+    try {
+      const bookData = {
+        userId,
+        title: formData.title,
+        author: formData.author,
+        rating: rating,
+        review: formData.review,
+      };
 
-    setIsSaving(false);
+      const url = editingBook 
+        ? `${API_URL}/${editingBook._id}` 
+        : API_URL;
+      
+      const method = editingBook ? 'PUT' : 'POST';
 
-    if (result.success) {
-      // Clear form on success
-      setFormData({
-        title: '',
-        author: '',
-        rating: '',
-        review: '',
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookData),
       });
-    } else {
-      setFormError(result.error || 'Failed to save book');
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save book');
+      }
+
+      onSuccess(data);
+      
+      if (!editingBook) {
+        setFormData({
+          title: '',
+          author: '',
+          rating: '',
+          review: '',
+        });
+      }
+    } catch (error) {
+      setFormError(error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <div className="book-form-container">
-      <h2>{editingBook ? 'Edit Book Review' : 'Add New Book Review'}</h2>
+      <div className="form-header">
+        <h2>{editingBook ? 'Edit Review' : 'Add New Review'}</h2>
+      </div>
       
       <form onSubmit={handleSubmit} className="book-form">
-        {formError && <div className="form-error">{formError}</div>}
+        {formError && (
+          <div className="alert alert-error">
+            {formError}
+          </div>
+        )}
         
-        <div className="form-group">
-          <label htmlFor="title">Book Title *</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Enter book title"
-            disabled={isSaving}
-            required
-          />
+        <div className="input-group">
+          <label htmlFor="title">Book Title</label>
+          <div className="input-wrapper">
+            <FiBook className="input-icon" />
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Enter book title"
+              disabled={isSaving}
+              required
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="author">Author *</label>
-          <input
-            type="text"
-            id="author"
-            name="author"
-            value={formData.author}
-            onChange={handleChange}
-            placeholder="Enter author name"
-            disabled={isSaving}
-            required
-          />
+        <div className="input-group">
+          <label htmlFor="author">Author</label>
+          <div className="input-wrapper">
+            <FiUser className="input-icon" />
+            <input
+              type="text"
+              id="author"
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              placeholder="Enter author name"
+              disabled={isSaving}
+              required
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="rating">Rating (1-5) *</label>
-          <input
-            type="number"
-            id="rating"
-            name="rating"
-            value={formData.rating}
-            onChange={handleChange}
-            placeholder="Rate from 1 to 5"
-            min="1"
-            max="5"
-            step="0.1"
-            disabled={isSaving}
-            required
-          />
+        <div className="input-group">
+          <label htmlFor="rating">Rating (1-5)</label>
+          <div className="input-wrapper">
+            <FiStar className="input-icon" />
+            <input
+              type="number"
+              id="rating"
+              name="rating"
+              value={formData.rating}
+              onChange={handleChange}
+              placeholder="Rate from 1 to 5"
+              min="1"
+              max="5"
+              step="0.1"
+              disabled={isSaving}
+              required
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="review">Your Review *</label>
-          <textarea
-            id="review"
-            name="review"
-            value={formData.review}
-            onChange={handleChange}
-            placeholder="Write your review here..."
-            rows="4"
-            disabled={isSaving}
-            required
-          />
+        <div className="input-group">
+          <label htmlFor="review">Your Review</label>
+          <div className="input-wrapper">
+            <FiFileText className="input-icon textarea-icon" />
+            <textarea
+              id="review"
+              name="review"
+              value={formData.review}
+              onChange={handleChange}
+              placeholder="Write your review..."
+              rows="4"
+              disabled={isSaving}
+              required
+            />
+          </div>
         </div>
 
         <div className="form-actions">
@@ -149,7 +195,8 @@ const BookForm = ({ onSubmit, onCancel, editingBook }) => {
             className="btn btn-primary"
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : (editingBook ? 'Update Review' : 'Add Review')}
+            <FiSave />
+            {isSaving ? 'Saving...' : (editingBook ? 'Update' : 'Add Review')}
           </button>
           {editingBook && (
             <button 
@@ -158,6 +205,7 @@ const BookForm = ({ onSubmit, onCancel, editingBook }) => {
               onClick={onCancel}
               disabled={isSaving}
             >
+              <FiX />
               Cancel
             </button>
           )}

@@ -1,11 +1,12 @@
 import React from 'react';
+import { FiLoader } from 'react-icons/fi';
 import './Loading.css';
 
 const Loading = () => {
   return (
     <div className="loading-container">
-      <div className="spinner"></div>
-      <p>Loading book reviews...</p>
+      <FiLoader className="loading-spinner" />
+      <p>Loading...</p>
     </div>
   );
 };

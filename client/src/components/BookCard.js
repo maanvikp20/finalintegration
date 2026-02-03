@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
+import { FiStar, FiEdit2, FiTrash2, FiCalendar } from 'react-icons/fi';
 import './BookCard.css';
 
-const BookCard = ({ book, onDelete, onEdit }) => {
+const API_URL = 'http://localhost:5000/api/books';
+
+const BookCard = ({ book, userId, onDelete, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete "${book.title}"?`)) {
+    if (window.confirm(`Delete "${book.title}"?`)) {
       setIsDeleting(true);
-      await onDelete(book.id);
-      setIsDeleting(false);
+      
+      try {
+        const response = await fetch(`${API_URL}/${book._id}?userId=${userId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok || response.status === 204) {
+          onDelete(book._id);
+        } else {
+          const data = await response.json();
+          alert(data.error || 'Failed to delete book');
+        }
+      } catch (error) {
+        alert('Error deleting book: ' + error.message);
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -20,52 +38,40 @@ const BookCard = ({ book, onDelete, onEdit }) => {
     });
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={i} className="star">★</span>);
-    }
-    if (hasHalfStar) {
-      stars.push(<span key="half" className="star half">★</span>);
-    }
-    for (let i = stars.length; i < 5; i++) {
-      stars.push(<span key={i} className="star empty">☆</span>);
-    }
-    return stars;
-  };
-
   return (
     <div className="book-card">
-      <div className="book-header">
-        <h3>{book.title}</h3>
-        <div className="rating">
-          {renderStars(book.rating)}
-          <span className="rating-number">{book.rating}</span>
+      <div className="book-card-header">
+        <h3 className="book-title">{book.title}</h3>
+        <div className="book-rating">
+          <FiStar className="star-icon" />
+          <span>{book.rating}</span>
         </div>
       </div>
       
-      <p className="author">by {book.author}</p>
+      <p className="book-author">{book.author}</p>
       
-      <p className="review">{book.review}</p>
+      <p className="book-review">{book.review}</p>
       
-      <div className="book-footer">
-        <span className="date">Reviewed {formatDate(book.createdAt)}</span>
-        <div className="actions">
+      <div className="book-card-footer">
+        <div className="book-date">
+          <FiCalendar className="calendar-icon" />
+          <span>{formatDate(book.createdAt)}</span>
+        </div>
+        <div className="book-actions">
           <button 
-            className="btn btn-edit" 
+            className="icon-btn" 
             onClick={() => onEdit(book)}
+            title="Edit"
           >
-            Edit
+            <FiEdit2 />
           </button>
           <button 
-            className="btn btn-delete" 
+            className="icon-btn icon-btn-danger" 
             onClick={handleDelete}
             disabled={isDeleting}
+            title="Delete"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            <FiTrash2 />
           </button>
         </div>
       </div>

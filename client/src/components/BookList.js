@@ -1,13 +1,15 @@
 import React from 'react';
+import { FiBookOpen } from 'react-icons/fi';
 import BookCard from './BookCard';
 import './BookList.css';
 
-const BookList = ({ books, onDelete, onEdit }) => {
+const BookList = ({ books, userId, onDelete, onEdit }) => {
   if (books.length === 0) {
     return (
       <div className="empty-state">
+        <FiBookOpen className="empty-icon" />
         <h3>No books yet</h3>
-        <p>Add your first book review to get started!</p>
+        <p>Add your first book review to get started</p>
       </div>
     );
   }
@@ -16,8 +18,9 @@ const BookList = ({ books, onDelete, onEdit }) => {
     <div className="book-list">
       {books.map(book => (
         <BookCard
-          key={book.id}
+          key={book._id}
           book={book}
+          userId={userId}
           onDelete={onDelete}
           onEdit={onEdit}
         />

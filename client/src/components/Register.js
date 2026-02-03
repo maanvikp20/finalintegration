@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import * as authService from '../services/authService';
-import { useAuth } from '../context/AuthContext';
+import { FiUser, FiMail, FiLock, FiUserPlus } from 'react-icons/fi';
 import './Auth.css';
 
-const Register = ({ onSwitchToLogin }) => {
-  const { login } = useAuth();
+const API_URL = 'http://localhost:5000/api/auth';
+
+const Register = ({ onLogin, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -28,110 +28,143 @@ const Register = ({ onSwitchToLogin }) => {
     setIsLoading(true);
     setError('');
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
 
-    const { confirmPassword, ...registerData } = formData;
-    const result = await authService.register(registerData);
+    try {
+      const { confirmPassword, ...registerData } = formData;
+      
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerData),
+      });
 
-    if (result.success) {
-      // Auto-login after successful registration
-      login(result.data.user);
-    } else {
-      setError(result.error);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+      onLogin(data.user);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>📖 Create Account</h2>
-        <p className="auth-subtitle">Start tracking your book reviews today!</p>
+        <div className="auth-header">
+          <h1>Book Review</h1>
+          <p>Create your account to get started.</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          {error && <div className="auth-error">{error}</div>}
+          {error && (
+            <div className="alert alert-error">
+              {error}
+            </div>
+          )}
 
-          <div className="form-group">
+          <div className="input-group">
             <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Choose a username"
-              disabled={isLoading}
-              required
-            />
+            <div className="input-wrapper">
+              <FiUser className="input-icon" />
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="Choose a username"
+                disabled={isLoading}
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              disabled={isLoading}
-              required
-            />
+          <div className="input-group">
+            <label htmlFor="email">Email Address</label>
+            <div className="input-wrapper">
+              <FiMail className="input-icon" />
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                disabled={isLoading}
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
+          <div className="input-group">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a password (min 6 characters)"
-              disabled={isLoading}
-              required
-            />
+            <div className="input-wrapper">
+              <FiLock className="input-icon" />
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password"
+                disabled={isLoading}
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
+          <div className="input-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              disabled={isLoading}
-              required
-            />
+            <div className="input-wrapper">
+              <FiLock className="input-icon" />
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                disabled={isLoading}
+                required
+              />
+            </div>
           </div>
 
           <button 
             type="submit" 
-            className="btn btn-primary btn-full"
+            className="btn btn-primary"
             disabled={isLoading}
           >
-            {isLoading ? 'Creating Account...' : 'Register'}
+            <FiUserPlus />
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <p className="auth-switch">
-          Already have an account?{' '}
-          <button 
-            className="link-button" 
-            onClick={onSwitchToLogin}
-            disabled={isLoading}
-          >
-            Login here
-          </button>
-        </p>
+        <div className="auth-footer">
+          <p>
+            Already have an account?{' '}
+            <button 
+              className="link-btn" 
+              onClick={onSwitchToLogin}
+              disabled={isLoading}
+            >
+              Login here
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

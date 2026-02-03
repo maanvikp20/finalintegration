@@ -9,7 +9,7 @@ const {
   getUserStats
 } = require('../controllers/bookController');
 
-// GET /api/books?userId=1 - Get all books for user
+// GET /api/books?userId=xxx - Get all books for user
 router.get('/', getAllBooks);
 
 // GET /api/books/stats/:userId - Get user statistics
@@ -24,7 +24,7 @@ router.post('/', createBook);
 // PUT /api/books/:id - Update book
 router.put('/:id', updateBook);
 
-// DELETE /api/books/:id?userId=1 - Delete book
+// DELETE /api/books/:id?userId=xxx - Delete book
 router.delete('/:id', deleteBook);
 
 module.exports = router;

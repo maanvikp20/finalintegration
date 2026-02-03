@@ -6,13 +6,26 @@
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  color: #666;
+  padding: 80px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 16px;
 }
 
 .empty-state h3 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
 }
 
 @media (max-width: 768px) {
