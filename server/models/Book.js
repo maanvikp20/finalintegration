@@ -1,31 +1,40 @@
 const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   title: {
     type: String,
-    required: [true, 'Title is required'],
+    required: true,
     trim: true
   },
   author: {
     type: String,
-    required: [true, 'Author is required'],
+    required: true,
     trim: true
   },
   rating: {
     type: Number,
-    required: [true, 'Rating is required'],
-    min: [1, 'Rating must be at least 1'],
-    max: [5, 'Rating must be at most 5']
+    required: true,
+    min: 1,
+    max: 5
   },
   review: {
     type: String,
-    required: [true, 'Review is required'],
+    required: true,
     trim: true
+  },
+  genre: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  dateRead: {
+    type: Date,
+    default: Date.now
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, {
   timestamps: true

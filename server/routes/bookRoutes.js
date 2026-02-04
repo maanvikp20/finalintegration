@@ -1,30 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getAllBooks,
-  getBookById,
+  getBooks,
+  getBook,
   createBook,
   updateBook,
-  deleteBook,
-  getUserStats
+  deleteBook
 } = require('../controllers/bookController');
+const { protect } = require('../middleware/auth');
 
-// GET /api/books?userId=xxx - Get all books for user
-router.get('/', getAllBooks);
+router.use(protect);
 
-// GET /api/books/stats/:userId - Get user statistics
-router.get('/stats/:userId', getUserStats);
+router.route('/')
+  .get(getBooks)
+  .post(createBook);
 
-// GET /api/books/:id - Get single book
-router.get('/:id', getBookById);
-
-// POST /api/books - Create new book
-router.post('/', createBook);
-
-// PUT /api/books/:id - Update book
-router.put('/:id', updateBook);
-
-// DELETE /api/books/:id?userId=xxx - Delete book
-router.delete('/:id', deleteBook);
+router.route('/:id')
+  .get(getBook)
+  .put(updateBook)
+  .delete(deleteBook);
 
 module.exports = router;

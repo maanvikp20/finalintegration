@@ -1,169 +1,76 @@
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+
+// Generate JWT Token
+const generateToken = (userId) => {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: '30d'
+  });
+};
 
 // Register new user
-const register = async (req, res) => {
+exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      if (existingUser.email === email) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-      if (existingUser.username === username) {
-        return res.status(400).json({ error: 'Username already exists' });
-      }
+    // Check if user exists
+    const userExists = await User.findOne({ $or: [{ email }, { username }] });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create new user
-    const user = new User({ username, email, password });
-    await user.save();
-
-    const userResponse = {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt
-    };
+    // Create user
+    const user = await User.create({
+      username,
+      email,
+      password
+    });
 
     res.status(201).json({
-      message: 'User registered successfully',
-      user: userResponse
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      token: generateToken(user._id)
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ error: messages.join(', ') });
-    }
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Failed to register user' });
+    res.status(500).json({ message: error.message });
   }
 };
 
 // Login user
-const login = async (req, res) => {
+exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    // Find user by email
+    // Find user
     const user = await User.findOne({ email });
-    if (!user || user.password !== password) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const userResponse = {
-      id: user._id,
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    res.json({
+      _id: user._id,
       username: user.username,
       email: user.email,
-      createdAt: user.createdAt
-    };
-
-    res.status(200).json({
-      message: 'Login successful',
-      user: userResponse
+      token: generateToken(user._id)
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Failed to login' });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Get user profile
-const getProfile = async (req, res) => {
+// Get current user
+exports.getMe = async (req, res) => {
   try {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId).select('-password');
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.status(200).json({
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt
-    });
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Failed to get profile' });
+    res.status(500).json({ message: error.message });
   }
-};
-
-// Update user profile
-const updateProfile = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { username, email, password } = req.body;
-
-    // Check if new email/username is already taken by another user
-    if (email || username) {
-      const existingUser = await User.findOne({
-        $or: [
-          ...(email ? [{ email }] : []),
-          ...(username ? [{ username }] : [])
-        ],
-        _id: { $ne: userId }
-      });
-
-      if (existingUser) {
-        if (existingUser.email === email) {
-          return res.status(400).json({ error: 'Email already exists' });
-        }
-        if (existingUser.username === username) {
-          return res.status(400).json({ error: 'Username already exists' });
-        }
-      }
-    }
-
-    const updateData = {};
-    if (username) updateData.username = username;
-    if (email) updateData.email = email;
-    if (password) updateData.password = password;
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.status(200).json({
-      message: 'Profile updated successfully',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        createdAt: user.createdAt
-      }
-    });
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ error: messages.join(', ') });
-    }
-    console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
-  }
-};
-
-// Logout
-const logout = (req, res) => {
-  res.status(200).json({ message: 'Logout successful' });
-};
-
-module.exports = {
-  register,
-  login,
-  getProfile,
-  updateProfile,
-  logout
 };

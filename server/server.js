@@ -1,59 +1,40 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const connectDB = require('./config/database');
-const authRoutes = require('./routes/authRoutes');
-const bookRoutes = require('./routes/bookRoutes');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Connect to MongoDB
-connectDB();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/books', bookRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/books', require('./routes/bookRoutes'));
 
-// Health check route
+// Root route
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Book Review API with MongoDB is running!',
-    database: 'MongoDB',
-    endpoints: {
-      auth: '/api/auth',
-      books: '/api/books'
-    }
-  });
+  res.json({ message: 'Book Review API is running' });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// Global error handler
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Start server
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
-  console.log(`🔐 Auth API available at http://localhost:${PORT}/api/auth`);
-  console.log(`📚 Books API available at http://localhost:${PORT}/api/books`);
-  console.log(`💾 Database: MongoDB`);
+  console.log(`Server is running on port ${PORT}`);
 });
-
-module.exports = app;
