@@ -87,7 +87,7 @@ npm install
 
 3. The `.env` file is already configured with your MongoDB connection string:
 ```
-MONGODB_URI=mongodb+srv://admin514_db_user:MaanvikPoddar@webdev.n0qniq2.mongodb.net/BookReview
+MONGODB_URI= your mongouri/BookReview
 PORT=5000
 JWT_SECRET=your_jwt_secret_key_change_this_in_production
 ```
